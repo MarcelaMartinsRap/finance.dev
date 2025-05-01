@@ -1,103 +1,225 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import { Pencil, Trash } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+
+interface Transaction {
+  id: number;
+  title: string;
+  value: number;
+  category: string;
+  date: string;
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [editing, setEditing] = useState<Transaction | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState<string>('Jan');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  // Carrega receitas do backend
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const res = await fetch('http://localhost:3001/incomes');
+        const data = await res.json();
+        const formatted = data.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          value: item.amount,
+          category: item.category || 'Receita',
+          date: new Date(item.date).toISOString().split("T")[0],
+        }));
+        setTransactions(formatted);
+      } catch (error) {
+        console.error("Erro ao buscar transações:", error);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
+
+  const handleSave = (transaction: Transaction) => {
+    if (transaction.id) {
+      setTransactions(prev => prev.map(t => t.id === transaction.id ? transaction : t));
+    } else {
+      const newTransaction = { ...transaction, id: Date.now() };
+      setTransactions(prev => [...prev, newTransaction]);
+    }
+    setIsOpen(false);
+    setEditing(null);
+  };
+
+  const handleDelete = (id: number) => {
+    setTransactions(prev => prev.filter(t => t.id !== id));
+  };
+
+  const saldoAtual = transactions.reduce((acc, t) => acc + t.value, 0);
+  const receitaTotal = transactions.filter(t => t.value > 0).reduce((acc, t) => acc + t.value, 0);
+  const despesaTotal = transactions.filter(t => t.value < 0).reduce((acc, t) => acc + Math.abs(t.value), 0);
+
+  return (
+    <div className="p-6 space-y-6">
+      <header className="flex justify-between items-center">
+        <h1 className="text-3xl font-semibold text-gray-800">Controle Financeiro</h1>
+        <div className="mb-4">
+          <p className="text-lg text-gray-600">Olá, Marcela</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </header>
+
+      <div className="p-4 space-y-4 bg-gray-100 rounded-lg shadow-lg">
+        <div className="p-4 bg-white shadow-lg rounded-lg">
+          <h2 className="text-3xl font-bold text-green-600">R$ {saldoAtual.toFixed(2)}</h2>
+          <small className="text-gray-500">Saldo atual</small>
+        </div>
+        <div className="p-4 bg-white shadow-lg rounded-lg">
+          <h2 className="text-3xl font-bold text-green-600">R$ {receitaTotal.toFixed(2)}</h2>
+          <small className="text-gray-500">Receita total</small>
+        </div>
+        <div className="p-4 bg-white shadow-lg rounded-lg">
+          <h2 className="text-3xl font-bold text-red-600">R$ {despesaTotal.toFixed(2)}</h2>
+          <small className="text-gray-500">Despesa total</small>
+        </div>
+      </div>
+
+      <div className="flex space-x-5 overflow-x-auto ml-4">
+        {["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"].map((m) => (
+          <Button
+            key={m}
+            variant={selectedMonth === m ? "default" : "outline"}
+            className={`px-6 py-3 text-lg font-medium transition duration-200 hover:bg-gray-200 ${selectedMonth === m ? 'text-blue-600' : 'text-black'}`}
+            onClick={() => setSelectedMonth(m)}
+          >
+            {m}
+          </Button>
+        ))}
+      </div>
+
+      <div className="bg-white p-4 shadow-lg rounded-lg mt-6">
+        <div className="flex justify-between items-center mb-4">
+          <Input placeholder="Filtrar por título" className="w-1/3 shadow-sm focus:ring-2 focus:ring-blue-500" />
+          <div className="space-x-2">
+            <Button variant="outline" className="hover:bg-gray-100 transition duration-200">Filtro recente</Button>
+            <Button variant="outline" className="hover:bg-gray-100 transition duration-200">Filtro valor</Button>
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={() => setEditing(null)} className="bg-green-600 text-white hover:bg-green-700 transition duration-200">Adicionar</Button>
+              </DialogTrigger>
+              <TransactionModal transaction={editing} onSave={handleSave} />
+            </Dialog>
+          </div>
+        </div>
+
+        <table className="w-full text-left table-auto">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-3 text-lg text-gray-700">Título</th>
+              <th className="p-3 text-lg text-gray-700">Valor</th>
+              <th className="p-3 text-lg text-gray-700">Categoria</th>
+              <th className="p-3 text-lg text-gray-700">Data</th>
+              <th className="p-3 text-lg text-gray-700">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {transactions.map((t) => (
+              <tr key={t.id} className="border-t hover:bg-gray-50">
+                <td className="p-3">{t.title}</td>
+                <td className={`p-3 ${t.value < 0 ? 'text-red-600' : 'text-green-600'}`}>R$ {Math.abs(t.value).toFixed(2)}</td>
+                <td className="p-3">{t.category}</td>
+                <td className="p-3">{new Date(t.date).toLocaleDateString()}</td>
+                <td className="p-3 flex space-x-2">
+                  <Pencil className="cursor-pointer text-yellow-600 hover:text-yellow-700" onClick={() => { setEditing(t); setIsOpen(true); }} />
+                  <Trash className="cursor-pointer text-red-600 hover:text-red-700" onClick={() => handleDelete(t.id)} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
+
+const TransactionModal = ({ transaction, onSave }: { transaction: Transaction | null, onSave: (t: Transaction) => void }) => {
+  const [form, setForm] = useState<Transaction>(
+    transaction || { id: 0, title: '', value: 0, category: '', date: new Date().toISOString().split('T')[0] }
+  );
+  const [type, setType] = useState<'income' | 'expense'>(transaction && transaction.value >= 0 ? 'income' : 'expense');
+
+  const handleSubmit = async () => {
+    const payload = {
+      title: form.title,
+      amount: type === 'income' ? Math.abs(form.value) : -Math.abs(form.value),
+      date: new Date(form.date).toISOString(),
+      user_uuid: 1,
+    };
+
+    try {
+      if (type === 'income') {
+        await fetch('http://localhost:3001/incomes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      } else {
+        console.warn('Despesa ainda não conectada ao backend.');
+      }
+
+      onSave({ ...form, value: payload.amount });
+    } catch (error) {
+      console.error('Erro ao salvar:', error);
+    }
+  };
+
+  return (
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>{transaction ? 'Editar Transação' : 'Nova Transação'}</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-4">
+        <div className="flex space-x-4">
+          <Button
+            variant={type === 'income' ? 'default' : 'outline'}
+            onClick={() => setType('income')}
+          >
+            Entrada
+          </Button>
+          <Button
+            variant={type === 'expense' ? 'default' : 'outline'}
+            onClick={() => setType('expense')}
+          >
+            Despesa
+          </Button>
+        </div>
+        <Input
+          placeholder="Título"
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+        />
+        <Input
+          placeholder="Valor"
+          type="text"
+          inputMode="decimal"
+          value={form.value}
+          onChange={(e) => setForm({ ...form, value: Number(e.target.value) })}
+        />
+        <Input
+          placeholder="Categoria"
+          value={form.category}
+          onChange={(e) => setForm({ ...form, category: e.target.value })}
+        />
+        <Input
+          type="date"
+          value={form.date}
+          onChange={(e) => setForm({ ...form, date: e.target.value })}
+        />
+        <Button className="w-full bg-blue-600 text-white hover:bg-blue-700" onClick={handleSubmit}>
+          Salvar
+        </Button>
+      </div>
+    </DialogContent>
+  );
+};
