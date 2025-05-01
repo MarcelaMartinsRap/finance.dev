@@ -7,15 +7,13 @@ async function main() {
     data: {
       name: 'Maria',
       email: 'maria@email.com',
-      password: '123456', 
+      password: '123456',
     },
   });
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
+  .then(() => prisma.$disconnect())
   .catch(async (e) => {
     console.error(e);
     await prisma.$disconnect();

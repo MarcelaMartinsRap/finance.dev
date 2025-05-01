@@ -1,5 +1,6 @@
 -- CreateTable
 CREATE TABLE "User" (
+    "uuid" TEXT NOT NULL,
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -11,6 +12,7 @@ CREATE TABLE "User" (
 -- CreateTable
 CREATE TABLE "Month" (
     "id" SERIAL NOT NULL,
+    "uuid" TEXT NOT NULL,
     "month" INTEGER NOT NULL,
     "year" INTEGER NOT NULL,
     "userId" INTEGER NOT NULL,
@@ -21,6 +23,7 @@ CREATE TABLE "Month" (
 -- CreateTable
 CREATE TABLE "Category" (
     "id" SERIAL NOT NULL,
+    "uuid" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "color" TEXT NOT NULL,
     "userId" INTEGER NOT NULL,
@@ -31,6 +34,7 @@ CREATE TABLE "Category" (
 -- CreateTable
 CREATE TABLE "Income" (
     "id" SERIAL NOT NULL,
+    "uuid" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "amount" DOUBLE PRECISION NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
@@ -42,6 +46,7 @@ CREATE TABLE "Income" (
 -- CreateTable
 CREATE TABLE "Expense" (
     "id" SERIAL NOT NULL,
+    "uuid" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "amount" DOUBLE PRECISION NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
@@ -75,10 +80,28 @@ CREATE TABLE "MonthlySummary" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_uuid_key" ON "User"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_id_key" ON "User"("id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Month_uuid_key" ON "Month"("uuid");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Month_month_year_userId_key" ON "Month"("month", "year", "userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Category_uuid_key" ON "Category"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Income_uuid_key" ON "Income"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Expense_uuid_key" ON "Expense"("uuid");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "FixedExpense_expenseId_key" ON "FixedExpense"("expenseId");
