@@ -1,0 +1,23 @@
+{
+  "name": "finance.dev",
+  "version": "1.0.0",
+  "description": "![React](https://img.shields.io/badge/React-18.2.0-blue?logo=react) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.3.0-38B2AC?logo=tailwind-css)",
+  "main": "index.js",
+  "scripts": {
+     "dev": "concurrently \"cd auth-service && npm run dev\" \"cd backend && npm run dev\" \"cd frontend && npm run dev\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarcelaMartinsRap/finance.dev.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MarcelaMartinsRap/finance.dev/issues"
+  },
+  "homepage": "https://github.com/MarcelaMartinsRap/finance.dev#readme",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
