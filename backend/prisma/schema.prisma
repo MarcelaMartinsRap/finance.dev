@@ -1,15 +1,79 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String  @unique
+  password String
+  months   Month[]
+  categories Category[]
+}
+
+model Month {
+  id       Int        @id @default(autoincrement())
+  month    Int
+  year     Int
+  userId   Int
+  user     User       @relation(fields: [userId], references: [id])
+  incomes  Income[]
+  expenses Expense[]
+  summary  MonthlySummary?
+
+  @@unique([month, year, userId])
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  color    String
+  userId   Int
+  user     User      @relation(fields: [userId], references: [id])
+  expenses Expense[]
+}
+
+model Income {
+  id       Int       @id @default(autoincrement())
+  title    String
+  amount   Float
+  date     DateTime
+  monthId  Int
+  month    Month     @relation(fields: [monthId], references: [id])
+}
+
+model Expense {
+  id             Int             @id @default(autoincrement())
+  title          String
+  amount         Float
+  date           DateTime
+  notes          String?
+  monthId        Int
+  month          Month           @relation(fields: [monthId], references: [id])
+  categoryId     Int
+  category       Category        @relation(fields: [categoryId], references: [id])
+  fixedExpense   FixedExpense?
+}
+
+model FixedExpense {
+  id            Int       @id @default(autoincrement())
+  is_fixed      Boolean
+  installments  Int
+  end_date      DateTime
+  expenseId     Int       @unique
+  expense       Expense   @relation(fields: [expenseId], references: [id])
+}
+
+model MonthlySummary {
+  id             Int      @id @default(autoincrement())
+  monthId        Int      @unique
+  totalIncome    Float
+  totalExpenses  Float
+  balance        Float
+  month          Month    @relation(fields: [monthId], references: [id])
 }
