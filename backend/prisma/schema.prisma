@@ -8,7 +8,8 @@ datasource db {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
+  uuid       String    @unique @default(uuid())
+  id         Int       @id @unique @default(autoincrement())
   name     String
   email    String  @unique
   password String
@@ -17,7 +18,8 @@ model User {
 }
 
 model Month {
-  id       Int        @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
+  uuid       String   @unique @default(uuid())
   month    Int
   year     Int
   userId   Int
@@ -30,7 +32,8 @@ model Month {
 }
 
 model Category {
-  id       Int       @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
+  uuid       String   @unique @default(uuid())
   name     String
   color    String
   userId   Int
@@ -39,7 +42,8 @@ model Category {
 }
 
 model Income {
-  id       Int       @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
+  uuid       String   @unique @default(uuid())
   title    String
   amount   Float
   date     DateTime
@@ -48,7 +52,8 @@ model Income {
 }
 
 model Expense {
-  id             Int             @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
+  uuid       String   @unique @default(uuid())
   title          String
   amount         Float
   date           DateTime
@@ -61,7 +66,7 @@ model Expense {
 }
 
 model FixedExpense {
-  id            Int       @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   is_fixed      Boolean
   installments  Int
   end_date      DateTime
@@ -70,7 +75,7 @@ model FixedExpense {
 }
 
 model MonthlySummary {
-  id             Int      @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   monthId        Int      @unique
   totalIncome    Float
   totalExpenses  Float
